@@ -1,0 +1,81 @@
+plugins {
+    id "io.spring.dependency-management" version "1.0.6.RELEASE"
+    id 'org.springframework.boot' version '2.1.2.RELEASE'
+    id "com.google.protobuf" version "0.8.13"
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+protobuf {
+    generatedFilesBaseDir = "$projectDir/src"
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.12.0"
+    }
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.32.1'
+        }
+    }
+    /* данная настройка нудна для первоначальной кодо-генерации*/
+
+/*    generateProtoTasks {
+        ofSourceSet("main")*.plugins {
+            grpc { }
+            reactor {}
+        }
+   }
+*/
+
+
+}
+
+dependencies {
+    compile 'org.springframework.boot:spring-boot:2.1.2.RELEASE'
+    compile 'org.springframework.boot:spring-boot-autoconfigure:2.1.2.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    compile 'com.google.protobuf:protobuf-java:3.11.0'
+    implementation 'io.grpc:grpc-netty-shaded:1.32.1'
+    implementation 'io.grpc:grpc-protobuf:1.32.1'
+    implementation 'io.grpc:grpc-stub:1.32.1'
+    compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+bootRun {
+    if (project.hasProperty('args')) {
+        args project.args.split(',')
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'grpcExampleBaeldung.src.GrpcServer'
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it)}
+    }
+//   bootRun()
+}
+
+
+
+
